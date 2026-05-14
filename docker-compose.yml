@@ -1,0 +1,9 @@
+services:
+  coupon-api:
+    build: .
+    container_name: coupon-api-app
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./h2-data:/app/data
+    restart: always
