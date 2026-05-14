@@ -12,11 +12,13 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class CouponTest {
 
+    private static final String VALID_CODE = "ABC123";
+
     @Test
     @DisplayName("Deve sanitizar o código removendo caracteres especiais e mantendo 6 caracteres")
     void deveSanitizarCodigoComSucesso() {
         Coupon coupon = new Coupon("ABC-123!", "Promo", new BigDecimal("10.0"), LocalDateTime.now().plusDays(1), true);
-        assertThat(coupon.getCode()).isEqualTo("ABC123");
+        assertThat(coupon.getCode()).isEqualTo(VALID_CODE);
     }
 
     @Test
@@ -41,7 +43,7 @@ class CouponTest {
         LocalDateTime expirationDate = LocalDateTime.now().plusDays(1);
 
         assertThatThrownBy(() ->
-                new Coupon("ABC123", "Desc", discount, expirationDate, true)
+                new Coupon(VALID_CODE, "Desc", discount, expirationDate, true)
         )
                 .isInstanceOf(BusinessException.class)
                 .hasMessage("O valor de desconto mínimo é 0.5");
@@ -55,7 +57,7 @@ class CouponTest {
         LocalDateTime pastDate = LocalDateTime.now().minusMinutes(1);
 
         assertThatThrownBy(() ->
-                new Coupon("ABC123", "Desc", discount, pastDate, true)
+                new Coupon(VALID_CODE, "Desc", discount, pastDate, true)
         )
                 .isInstanceOf(BusinessException.class)
                 .hasMessage("A data de expiração não pode ser no passado.");
