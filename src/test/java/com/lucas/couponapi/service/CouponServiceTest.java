@@ -48,8 +48,6 @@ class CouponServiceTest {
     @Test
     @DisplayName("Deve lançar exceção ao tentar remover cupom inexistente")
     void deveLancarExcecaoAoRemoverCupomInexistente() {
-        UUID id = UUID.randomUUID();
-
         when(repository.findById(id)).thenReturn(Optional.empty());
 
         BusinessException exception = assertThrows(
