@@ -208,11 +208,13 @@ src
  ┃ ┃    ┣ dto
  ┃ ┃    ┣ model
  ┃ ┃    ┣ exception
- ┃ ┃    ┗ config
+ ┃ ┃    ┃ ┗ handler
+ ┃ ┃    ┣ config
+ ┃ ┃    ┣ mapper
+ ┃ ┃    ┗ CouponApiApplication.java
  ┃ ┗ resources
- ┃    ┣ application.yml
- ┃    ┗ data.sql
  ┗ test
+    ┗ java
 ```
 
 ---
@@ -222,7 +224,7 @@ src
 * Arquitetura organizada
 * Clean Code
 * Regras de domínio centralizadas
-* Soft Delete com Hibernate
+* Soft Delete
 * Sanitização automática
 * Persistência real do H2
 * Totalmente containerizado
