@@ -49,35 +49,4 @@ class CouponMapperTest {
                 .isEqualTo(domain.isPublished());
     }
 
-    @Test
-    @DisplayName("Deve converter Entity para Domain")
-    void deveConverterEntityParaDomain() {
-
-        CouponEntity entity = new CouponEntity();
-
-        entity.setCode("ABC123");
-        entity.setDescription("Cupom Teste");
-        entity.setDiscountValue(new BigDecimal("10.0"));
-        entity.setExpirationDate(LocalDateTime.now().plusDays(1));
-        entity.setPublished(true);
-
-        Coupon domain = mapper.toDomain(entity);
-
-        assertThat(domain).isNotNull();
-
-        assertThat(domain.getCode())
-                .isEqualTo(entity.getCode());
-
-        assertThat(domain.getDescription())
-                .isEqualTo(entity.getDescription());
-
-        assertThat(domain.getDiscountValue())
-                .isEqualTo(entity.getDiscountValue());
-
-        assertThat(domain.getExpirationDate())
-                .isEqualTo(entity.getExpirationDate());
-
-        assertThat(domain.isPublished())
-                .isEqualTo(entity.isPublished());
-    }
 }

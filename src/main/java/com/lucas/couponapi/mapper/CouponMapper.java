@@ -8,8 +8,6 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring")
 public interface CouponMapper {
 
-    Coupon toDomain(CouponEntity entity);
-
     @Mapping(target = "id", ignore = true)
     CouponEntity toEntity(Coupon domain);
 }
