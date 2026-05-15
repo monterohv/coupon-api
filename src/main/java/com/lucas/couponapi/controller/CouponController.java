@@ -1,7 +1,7 @@
 package com.lucas.couponapi.controller;
 
 import com.lucas.couponapi.dto.CouponDTO;
-import com.lucas.couponapi.model.Coupon;
+import com.lucas.couponapi.model.CouponEntity;
 import com.lucas.couponapi.service.CouponService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -33,14 +33,14 @@ public class CouponController {
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Cupom criado com sucesso",
-                    content = @Content(schema = @Schema(implementation = Coupon.class))),
+                    content = @Content(schema = @Schema(implementation = CouponEntity.class))),
             @ApiResponse(responseCode = "400", description = "Dados inválidos ou violação de regra de negócio",
                     content = @Content(schema = @Schema(example = "{\"message\": \"O desconto mínimo é 0,5.\"}")))
     })
     @PostMapping
-    public ResponseEntity<Coupon> create(@RequestBody @Valid CouponDTO dto) {
-        Coupon newCoupon = service.create(dto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(newCoupon);
+    public ResponseEntity<CouponEntity> create(@RequestBody @Valid CouponDTO dto) {
+        CouponEntity newCouponEntity = service.create(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(newCouponEntity);
     }
 
     @Operation(
@@ -49,12 +49,12 @@ public class CouponController {
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Cupom encontrado com sucesso",
-                    content = @Content(schema = @Schema(implementation = Coupon.class))),
+                    content = @Content(schema = @Schema(implementation = CouponEntity.class))),
             @ApiResponse(responseCode = "400", description = "Cupom não encontrado ou já removido",
                     content = @Content(schema = @Schema(example = "{\"message\": \"Cupom não encontrado.\"}")))
     })
     @GetMapping("/{id}")
-    public ResponseEntity<Coupon> findById(
+    public ResponseEntity<CouponEntity> findById(
             @Parameter(description = "ID numérico do cupom", example = "1")
             @PathVariable UUID id
     ) {

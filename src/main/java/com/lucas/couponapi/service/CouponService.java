@@ -2,11 +2,13 @@ package com.lucas.couponapi.service;
 
 import com.lucas.couponapi.dto.CouponDTO;
 import com.lucas.couponapi.exception.BusinessException;
-import com.lucas.couponapi.model.Coupon;
+import com.lucas.couponapi.model.CouponEntity;
+import com.lucas.couponapi.model.domain.Coupon;
 import com.lucas.couponapi.repositoy.CouponRepository;
-import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
+import com.lucas.couponapi.mapper.CouponMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
@@ -15,10 +17,11 @@ import java.util.UUID;
 public class CouponService {
 
     private final CouponRepository repository;
+    private final CouponMapper mapper;
 
     @Transactional
-    public Coupon create(CouponDTO dto) {
-        Coupon coupon = new Coupon(
+    public CouponEntity create(CouponDTO dto) {
+        Coupon domain = new Coupon(
                 dto.code(),
                 dto.description(),
                 dto.discountValue(),
@@ -26,21 +29,23 @@ public class CouponService {
                 dto.published()
         );
 
-        return repository.save(coupon);
+        CouponEntity couponEntity = mapper.toEntity(domain);
+        return repository.save(couponEntity);
     }
 
     @Transactional(readOnly = true)
-    public Coupon findById(UUID id) {
+    public CouponEntity findById(UUID id) {
         return repository.findById(id)
                 .orElseThrow(() -> new BusinessException("Cupom não encontrado."));
     }
 
     @Transactional
     public void delete(UUID id) {
-        Coupon coupon = repository.findById(id)
-                .orElseThrow(() -> new BusinessException("Cupom não encontrado ou já removido."));
+        CouponEntity couponEntity = repository.findByIdAndDeletedFalse(id)
+                .orElseThrow(() ->
+                        new BusinessException("Cupom não encontrado ou já removido."));
 
-        coupon.setDeleted(true);
-        repository.save(coupon);
+        couponEntity.setDeleted(true);
+        repository.save(couponEntity);
     }
 }

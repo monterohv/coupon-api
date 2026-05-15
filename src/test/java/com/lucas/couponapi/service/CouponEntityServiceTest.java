@@ -2,7 +2,9 @@ package com.lucas.couponapi.service;
 
 import com.lucas.couponapi.dto.CouponDTO;
 import com.lucas.couponapi.exception.BusinessException;
-import com.lucas.couponapi.model.Coupon;
+import com.lucas.couponapi.mapper.CouponMapper;
+import com.lucas.couponapi.model.CouponEntity;
+import com.lucas.couponapi.model.domain.Coupon;
 import com.lucas.couponapi.repositoy.CouponRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -23,7 +25,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class CouponServiceTest {
+class CouponEntityServiceTest {
 
     @Mock
     private CouponRepository repository;
@@ -31,24 +33,46 @@ class CouponServiceTest {
     @InjectMocks
     private CouponService service;
 
+    @Mock
+    private CouponMapper mapper;
+
     UUID id = UUID.randomUUID();
 
     @Test
     @DisplayName("Criação válida: Deve salvar cupom quando DTO for íntegro")
     void deveCriarCupomValidoESalvarNoBanco() {
-        CouponDTO dto = new CouponDTO("DESC10", "10% OFF", BigDecimal.valueOf(10.0), LocalDateTime.now().plusDays(10), true);
-        when(repository.save(any(Coupon.class))).thenReturn(new Coupon());
 
-        Coupon result = service.create(dto);
+        CouponDTO dto = new CouponDTO(
+                "DESC10",
+                "10% OFF",
+                BigDecimal.valueOf(10.0),
+                LocalDateTime.now().plusDays(10),
+                true
+        );
+
+        CouponEntity entity = new CouponEntity();
+
+        when(mapper.toEntity(any(Coupon.class)))
+                .thenReturn(entity);
+
+        when(repository.save(any(CouponEntity.class)))
+                .thenReturn(entity);
+
+        CouponEntity result = service.create(dto);
 
         assertNotNull(result);
-        verify(repository, times(1)).save(any(Coupon.class));
+
+        verify(mapper, times(1))
+                .toEntity(any(Coupon.class));
+
+        verify(repository, times(1))
+                .save(any(CouponEntity.class));
     }
 
     @Test
     @DisplayName("Deve lançar exceção ao tentar remover cupom inexistente")
     void deveLancarExcecaoAoRemoverCupomInexistente() {
-        when(repository.findById(id)).thenReturn(Optional.empty());
+        when(repository.findByIdAndDeletedFalse(id)).thenReturn(Optional.empty());
 
         BusinessException exception = assertThrows(
                 BusinessException.class,
@@ -64,7 +88,7 @@ class CouponServiceTest {
     @Test
     @DisplayName("Delete Duplicado: Deve lançar erro se o cupom já não existir")
     void deveLancarErroAoTentarDeletarCupomDuplicado() {
-        when(repository.findById(id)).thenReturn(Optional.empty());
+        when(repository.findByIdAndDeletedFalse(id)).thenReturn(Optional.empty());
 
         BusinessException ex = assertThrows(BusinessException.class, () -> service.delete(id));
         assertEquals("Cupom não encontrado ou já removido.", ex.getMessage());
@@ -74,38 +98,41 @@ class CouponServiceTest {
     @DisplayName("Soft Delete: Deve marcar o cupom como deletado sem removê-lo do banco")
     void shouldSoftDeleteCoupon() {
 
-        Coupon coupon = new Coupon();
-        coupon.setId(id);
-        coupon.setDeleted(false);
+        CouponEntity couponEntity = new CouponEntity();
+        couponEntity.setId(id);
+        couponEntity.setDeleted(false);
 
-        when(repository.findById(id))
-                .thenReturn(Optional.of(coupon));
+        when(repository.findByIdAndDeletedFalse(id))
+                .thenReturn(Optional.of(couponEntity));
 
         service.delete(id);
 
-        assertTrue(coupon.isDeleted());
+        assertTrue(couponEntity.isDeleted());
 
-        verify(repository).save(coupon);
+        verify(repository).save(couponEntity);
     }
 
     @Test
     @DisplayName("Deve retornar um cupom quando o ID existir no banco de dados")
     void deveRetornarCupomQuandoIdExistir() {
-        Coupon mockCoupon = new Coupon(
-                "OFF100",
-                "Desconto de Teste",
-                new BigDecimal("100.00"),
-                LocalDateTime.now().plusDays(5),
-                true
+        CouponEntity mockCouponEntity = new CouponEntity(
+                null,
+                "ABC123",
+                "Cupom de Natal",
+                new BigDecimal("25.00"),
+                LocalDateTime.now().plusDays(1),
+                true,
+                false,
+                false
         );
 
-        when(repository.findById(id)).thenReturn(Optional.of(mockCoupon));
+        when(repository.findById(id)).thenReturn(Optional.of(mockCouponEntity));
 
-        Coupon result = service.findById(id);
+        CouponEntity result = service.findById(id);
 
         assertThat(result).isNotNull();
-        assertThat(result.getCode()).isEqualTo("OFF100");
-        assertThat(result.getDiscountValue()).isEqualByComparingTo("100.00");
+        assertThat(result.getCode()).isEqualTo("ABC123");
+        assertThat(result.getDiscountValue()).isEqualByComparingTo("25.00");
 
         verify(repository, times(1)).findById(id);
     }

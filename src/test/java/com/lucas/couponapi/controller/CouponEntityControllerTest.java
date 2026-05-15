@@ -3,7 +3,7 @@ package com.lucas.couponapi.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.lucas.couponapi.dto.CouponDTO;
-import com.lucas.couponapi.model.Coupon;
+import com.lucas.couponapi.model.CouponEntity;
 import com.lucas.couponapi.service.CouponService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -24,7 +24,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(CouponController.class)
-class CouponControllerTest {
+class CouponEntityControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -38,15 +38,27 @@ class CouponControllerTest {
     void setup() {
         objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
+
     }
+
+    CouponEntity couponEntity = new CouponEntity(
+            null,
+            "ABC123",
+            "Cupom de Natal",
+            new BigDecimal("25.00"),
+            LocalDateTime.now().plusDays(1),
+            true,
+            false,
+            false
+    );
+
 
     @Test
     @DisplayName("POST /coupon - Deve retornar 201 Created ao criar um cupom válido")
     void deveCriarCupomERetornar201() throws Exception {
         CouponDTO dto = new CouponDTO("ABC-123", "Cupom de Natal", new BigDecimal("25.00"), LocalDateTime.now().plusDays(1), true);
-        Coupon coupon = new Coupon("ABC123", "Cupom de Natal", new BigDecimal("25.00"), LocalDateTime.now().plusDays(1), true);
 
-        when(service.create(any(CouponDTO.class))).thenReturn(coupon);
+        when(service.create(any(CouponDTO.class))).thenReturn(couponEntity);
 
         mockMvc.perform(post("/coupon")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -60,13 +72,12 @@ class CouponControllerTest {
     @DisplayName("GET /coupon/{id} - Deve retornar 200 OK quando o cupom existir")
     void deveRetornarCupomQuandoExistir() throws Exception {
         UUID id = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
-        Coupon coupon = new Coupon("PROMO1", "Desc", new BigDecimal("10.00"), LocalDateTime.now().plusDays(1), true);
 
-        when(service.findById(id)).thenReturn(coupon);
+        when(service.findById(id)).thenReturn(couponEntity);
 
         mockMvc.perform(get("/coupon/{id}", id))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.code").value("PROMO1"));
+                .andExpect(jsonPath("$.code").value("ABC123"));
 
         verify(service, times(1)).findById(id);
     }
