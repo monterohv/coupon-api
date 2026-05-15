@@ -38,7 +38,6 @@ public record CouponDTO(
                 example = "2026-12-31T23:59:59"
         )
         @NotNull(message = "A data de expiração é obrigatória")
-        @Future(message = "A data deve ser no futuro")
         LocalDateTime expirationDate,
 
         @Schema(
